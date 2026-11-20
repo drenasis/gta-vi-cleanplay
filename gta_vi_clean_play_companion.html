@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GTA VI Clean Play Companion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            vice: {
+              bg: '#09090b',
+              card: '#121216',
+              elevated: '#1a1a22',
+              border: '#272732',
+              pink: '#ff2a85',
+              cyan: '#00f0ff',
+              purple: '#9d4edd',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar & mobile touch optimization */
+    body {
+      background-color: #09090b;
+      color: #f4f4f5;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+
+    /* Subtle Vice City neon ambient glow */
+    .vice-glow-pink {
+      box-shadow: 0 0 24px -6px rgba(255, 42, 133, 0.35);
+    }
+    .vice-glow-amber {
+      box-shadow: 0 0 24px -6px rgba(245, 158, 11, 0.3);
+    }
+    .vice-glow-emerald {
+      box-shadow: 0 0 24px -6px rgba(16, 185, 129, 0.25);
+    }
+
+    /* Smooth pulse for explicit skip alert */
+    @keyframes pulseBorder {
+      0%, 100% { border-color: rgba(244, 63, 94, 0.8); }
+      50% { border-color: rgba(255, 42, 133, 0.35); }
+    }
+    .animate-alert-border {
+      animation: pulseBorder 2s infinite ease-in-out;
+    }
+
+    /* Hide scrollbar for clean horizontal pills if needed */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-vice-bg text-zinc-100 selection:bg-vice-pink selection:text-white">
+
+  <!-- Top Sticky Header -->
+  <header class="sticky top-0 z-30 bg-vice-bg/90 backdrop-blur-md border-b border-vice-border px-4 py-3">
+    <div class="max-w-2xl mx-auto flex flex-col gap-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-vice-pink to-vice-purple flex items-center justify-center shadow-lg shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight text-white">
+              GTA VI <span class="text-transparent bg-clip-text bg-gradient-to-r from-vice-pink to-vice-cyan">Clean Play</span>
+            </h1>
+            <p class="text-[11px] text-zinc-400 font-medium">Spoiler-Free Content Companion</p>
+          </div>
+        </div>
+
+        <!-- Audio Toggle & Test Button -->
+        <div class="flex items-center gap-1.5">
+          <button id="testChimeBtn" type="button" title="Test Warning Chime"
+            class="px-2.5 py-2 rounded-xl bg-vice-elevated hover:bg-zinc-800 active:scale-95 border border-vice-border text-xs font-semibold text-zinc-300 transition flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-vice-cyan" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+            </svg>
+            <span class="hidden sm:inline">Test Tone</span>
+          </button>
+
+          <button id="muteToggleBtn" type="button" aria-label="Toggle Audio Alerts"
+            class="p-2 rounded-xl bg-vice-elevated hover:bg-zinc-800 active:scale-95 border border-vice-border text-zinc-200 transition">
+            <svg id="soundOnIcon" class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+            <svg id="soundOffIcon" class="w-4 h-4 text-rose-400 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.143 17.082a24.248 24.248 0 003.844.148m-3.844-.148a23.856 23.856 0 01-5.455-1.31 8.964 8.964 0 002.3-5.542m3.155 6.852a3 3 0 005.667 1.97m1.965-2.277L21 21m-4.225-4.225a23.81 23.81 0 003.536-1.003A8.967 8.967 0 0118 9.75V9A6 6 0 006.53 6.53m10.245 10.245L6.53 6.53M3 3l3.53 3.53" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter & Search Row -->
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-7 sm:col-span-6 relative">
+          <select id="chapterFilter" aria-label="Filter by Chapter"
+            class="w-full appearance-none bg-vice-elevated border border-vice-border rounded-xl px-3 py-2.5 pr-8 text-xs sm:text-sm font-semibold text-zinc-100 focus:outline-none focus:border-vice-cyan transition">
+            <option value="all">All Chapters (109 Missions)</option>
+            <option value="Prologue">Prologue (Mission 1)</option>
+            <option value="Chapter 1">Chapter 1: Just Like Paradise (2–25)</option>
+            <option value="Chapter 2">Chapter 2: Paradise Lost (26–43)</option>
+            <option value="Chapter 3">Chapter 3: Tits Ass Drug Money (44–71)</option>
+            <option value="Chapter 4">Chapter 4: Vice City, Baby (72–100)</option>
+            <option value="Chapter 5">Chapter 5: Top of the World, Ma (101–109)</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-zinc-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="col-span-5 sm:col-span-6 relative">
+          <select id="statusFilter" aria-label="Filter by Rating"
+            class="w-full appearance-none bg-vice-elevated border border-vice-border rounded-xl px-3 py-2.5 pr-8 text-xs sm:text-sm font-semibold text-zinc-100 focus:outline-none focus:border-vice-pink transition">
+            <option value="all">All Ratings</option>
+            <option value="flagged">Flagged Only</option>
+            <option value="explicit">SKIP CUTSCENE</option>
+            <option value="caution">Caution Only</option>
+            <option value="safe">Safe Only</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-zinc-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="flex items-center gap-2.5">
+        <div class="flex-1 h-1.5 bg-vice-elevated rounded-full overflow-hidden">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-vice-pink via-vice-purple to-vice-cyan transition-all duration-300" style="width: 1%;"></div>
+        </div>
+        <span id="progressText" class="text-[11px] font-bold text-zinc-400 tabular-nums shrink-0">1 / 109</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-2xl w-full mx-auto px-4 pt-4 pb-36 space-y-5">
+
+    <!-- Active Mission Spotlight Card -->
+    <section aria-label="Current Active Mission">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-vice-cyan animate-ping"></span>
+          Up Next / Active Mission
+        </span>
+        <button id="resetProgressBtn" type="button" class="text-[11px] font-semibold text-zinc-500 hover:text-zinc-300 underline underline-offset-2">
+          Reset to #1
+        </button>
+      </div>
+
+      <div id="activeMissionCard" class="rounded-2xl bg-vice-card border-2 border-vice-border p-4 sm:p-5 transition-all duration-300">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- Free Roam Quick Reminder Banner -->
+    <div class="rounded-2xl bg-vice-elevated/70 border border-vice-border p-3.5 flex items-start gap-3">
+      <div class="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0 mt-0.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
+      <div class="text-xs text-zinc-300 leading-relaxed">
+        <span class="font-bold text-white">Free-Roam Tip:</span> Avoid strip clubs (<span class="text-zinc-200 font-medium">Nine1Nine</span>, <span class="text-zinc-200 font-medium">Jack of Hearts</span>, <span class="text-zinc-200 font-medium">Delights Cabaret</span>) and marked nudist beaches outside of required story markers.
+      </div>
+    </div>
+
+    <!-- Chronological Mission List -->
+    <section aria-label="Chronological Mission List" class="space-y-2.5">
+      <div class="flex items-center justify-between">
+        <h2 id="listHeading" class="text-xs font-bold uppercase tracking-wider text-zinc-400">
+          Chronological Mission Log
+        </h2>
+        <span id="filteredCountBadge" class="text-[11px] font-semibold text-zinc-400 bg-vice-elevated px-2.5 py-0.5 rounded-full border border-vice-border">
+          109 missions
+        </span>
+      </div>
+
+      <div id="missionListContainer" class="space-y-2.5">
+        <!-- Mission cards rendered dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Bottom Action Bar -->
+  <footer class="fixed bottom-0 inset-x-0 z-30 bg-vice-bg/95 backdrop-blur-lg border-t border-vice-border px-4 py-3 safe-area-pb">
+    <div class="max-w-2xl mx-auto flex items-center gap-2.5">
+      <button id="prevMissionBtn" type="button" aria-label="Previous Mission"
+        class="p-3.5 rounded-2xl bg-vice-elevated hover:bg-zinc-800 active:scale-95 border border-vice-border text-zinc-200 transition shrink-0 disabled:opacity-40 disabled:pointer-events-none">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+
+      <button id="nextMissionBtn" type="button"
+        class="flex-1 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-vice-pink to-vice-purple hover:brightness-110 active:scale-[0.98] text-white font-extrabold text-sm sm:text-base tracking-wide shadow-lg shadow-vice-pink/25 transition flex items-center justify-center gap-2">
+        <span>Next Mission</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Custom Modal / Toast Message Box (No alert/confirm) -->
+  <div id="toastBanner" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+    <div id="toastInner" class="px-4 py-2.5 rounded-2xl bg-rose-950/95 border border-rose-500 text-rose-100 text-xs font-bold shadow-2xl flex items-center gap-2 whitespace-nowrap">
+      <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+      <span id="toastText">Flagged Mission Alert!</span>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Complete Chronological Main Story Mission Dataset (Missions 1–109)
+     * Chapters: Prologue, Chapter 1, Chapter 2, Chapter 3, Chapter 4, Chapter 5
+     * Status levels:
+     *  - "safe": Safe
+     *  - "caution": Caution (Mild/Background)
+     *  - "explicit": SKIP CUTSCENE (Explicit)
+     * Zero plot spoilers, deaths, or twists included.
+     */
+    const MISSIONS = [
+      // PROLOGUE
+      { id: 1, chapter: "Prologue", chapterTitle: "Prologue", title: "Prologue", character: "Lucia", status: "safe", instruction: "" },
+
+      // CHAPTER 1: Just Like Paradise (2–25)
+      { id: 2, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Gone Fishing", character: "Jason", status: "safe", instruction: "" },
+      { id: 3, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Gear Up", character: "Jason", status: "safe", instruction: "" },
+      { id: 4, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Unwanted Attention", character: "Jason", status: "safe", instruction: "" },
+      { id: 5, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Lab Fees", character: "Jason", status: "safe", instruction: "" },
+      { id: 6, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Pipework", character: "Jason", status: "caution", instruction: "Tenant appears in a very small bikini during the indoor repair scene; keep camera angled away or skip the cutscene." },
+      { id: 7, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Just a Scratch", character: "Jason", status: "safe", instruction: "" },
+      { id: 8, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Hey Arnold!", character: "Jason", status: "caution", instruction: "Ends at a resort pool party with swimwear in the background; head straight to the objective marker." },
+      { id: 9, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Island Dreams", character: "Jason", status: "caution", instruction: "Boat charter includes swimwear attire; stay focused on the diving objectives." },
+      { id: 10, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Feng Shui", character: "Jason", status: "safe", instruction: "" },
+      { id: 11, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Coming Home", character: "Jason", status: "safe", instruction: "" },
+      { id: 12, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Clean Up After Donnie", character: "Jason", status: "safe", instruction: "" },
+      { id: 13, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Buck Me", character: "Jason", status: "safe", instruction: "" },
+      { id: 14, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Down to Earth", character: "Jason", status: "safe", instruction: "" },
+      { id: 15, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Deposit Cash Into BuckMe", character: "Jason", status: "safe", instruction: "" },
+      { id: 16, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Save for the Future", character: "Jason", status: "safe", instruction: "" },
+      { id: 17, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Day Release", character: "Jason & Lucia", status: "explicit", instruction: "SKIP CUTSCENES during the yacht, Nine1Nine club, and late-night hotel hallway segments—contains explicit nudity and sexual acts behind doors." },
+      { id: 18, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Clear Skies", character: "Jason", status: "safe", instruction: "" },
+      { id: 19, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Building a Life", character: "Jason", status: "safe", instruction: "" },
+      { id: 20, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Swamped", character: "Jason", status: "safe", instruction: "" },
+      { id: 21, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Don Gone", character: "Jason", status: "safe", instruction: "" },
+      { id: 22, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Recalibration", character: "Jason", status: "safe", instruction: "" },
+      { id: 23, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Tourist Trap", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 24, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Home Sweet Home", character: "Lucia", status: "safe", instruction: "" },
+      { id: 25, chapter: "Chapter 1", chapterTitle: "Just Like Paradise", title: "Discharge Time", character: "Jason & Lucia", status: "safe", instruction: "" },
+
+      // CHAPTER 2: Paradise Lost (26–43)
+      { id: 26, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "What's in the Bag?", character: "Lucia", status: "safe", instruction: "" },
+      { id: 27, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Ambulance Chaser", character: "Lucia", status: "safe", instruction: "" },
+      { id: 28, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Play Nurse", character: "Lucia", status: "safe", instruction: "" },
+      { id: 29, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Overnight Charges", character: "Lucia", status: "safe", instruction: "" },
+      { id: 30, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Just Moved In", character: "Lucia", status: "safe", instruction: "" },
+      { id: 31, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Girls' Trip", character: "Lucia", status: "caution", instruction: "Briefly visits the exterior/entrance of Delights Cabaret; stay outside or skip the arrival cutscene." },
+      { id: 32, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Moses", character: "Lucia", status: "safe", instruction: "" },
+      { id: 33, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "New Look", character: "Lucia", status: "safe", instruction: "" },
+      { id: 34, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "How Do I Look?", character: "Lucia", status: "safe", instruction: "" },
+      { id: 35, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Got Pills?", character: "Lucia", status: "safe", instruction: "" },
+      { id: 36, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Daily Driver", character: "Lucia", status: "safe", instruction: "" },
+      { id: 37, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Behind on Payments", character: "Lucia", status: "safe", instruction: "" },
+      { id: 38, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Slam Dunk", character: "Lucia", status: "safe", instruction: "" },
+      { id: 39, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Breakfast Run", character: "Lucia", status: "safe", instruction: "" },
+      { id: 40, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Coffee Break", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 41, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Prepare for Vice City", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 42, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Afternoon Delight", character: "Jason & Lucia", status: "explicit", instruction: "Takes place inside Delights Cabaret. When prompted backstage, choose 'DON'T HELP' to skip the male strip routine, keep camera angled down, and skip stage cutscenes." },
+      { id: 43, chapter: "Chapter 2", chapterTitle: "Paradise Lost", title: "Checking Out", character: "Jason & Lucia", status: "safe", instruction: "" },
+
+      // CHAPTER 3: Tits Ass Drug Money (44–71)
+      { id: 44, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Welcome to Vice City", character: "Jason & Lucia", status: "explicit", instruction: "Hold skip right as the mission starts—meets contacts inside Jack of Hearts club and includes an explicit party montage cutscene." },
+      { id: 45, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Dealer's Choice", character: "Jason", status: "safe", instruction: "" },
+      { id: 46, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Meet the Heders", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 47, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Dubious Provenance", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 48, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Mami Knows Best", character: "Lucia", status: "safe", instruction: "" },
+      { id: 49, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "South Leonida Real Estate", character: "Lucia", status: "safe", instruction: "" },
+      { id: 50, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Here, Kitty Kitty", character: "Jason", status: "safe", instruction: "" },
+      { id: 51, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Send Money to Lorena", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 52, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Car Service", character: "Lucia", status: "safe", instruction: "" },
+      { id: 53, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Send More Money to Lorena", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 54, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Top Billing", character: "Jason & Lucia", status: "explicit", instruction: "Set inside Jack of Hearts club and an after-party; skip the opening/stage cutscenes and keep camera angled down while moving through the club." },
+      { id: 55, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Boobie Time", character: "Jason", status: "caution", instruction: "Starts/ends near a club office; skip the intro cutscene and head straight to the vehicle." },
+      { id: 56, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "First Impressions", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 57, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Caught Slipping", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 58, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Crosstown Traffic", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 59, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Credit Check", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 60, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Steal the Zorrusso for Randy", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 61, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Sinfrontera National Bank", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 62, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Security Expert", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 63, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Heist Planning", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 64, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Ride or Die", character: "Jason", status: "safe", instruction: "" },
+      { id: 65, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Company Property", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 66, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "The Missing Link", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 67, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Safe Word", character: "Lucia", status: "safe", instruction: "" },
+      { id: 68, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Cooties", character: "Lucia", status: "caution", instruction: "Music video shoot features revealing outfits and suggestive dancing; focus on the driving prompts and skip the intro cutscene." },
+      { id: 69, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Bricked Up", character: "Jason & Lucia", status: "caution", instruction: "Briefing occurs near a club backroom; skip the opening cutscene." },
+      { id: 70, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "Hidden Charges", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 71, chapter: "Chapter 3", chapterTitle: "Tits Ass Drug Money", title: "The Cartel Heist", character: "Jason & Lucia", status: "safe", instruction: "" },
+
+      // CHAPTER 4: Vice City, Baby (72–100)
+      { id: 72, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Ocean Beach", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 73, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Another Life", character: "Lucia", status: "caution", instruction: "Includes brief bedroom/morning attire in a flashback cutscene; skip if playing in a shared room." },
+      { id: 74, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Pool Day", character: "Jason & Lucia", status: "caution", instruction: "Hotel pool deck features swimwear and sunbathing NPCs; keep camera angled toward the bar and cabana." },
+      { id: 75, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Company Cars", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 76, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Lawyer Up", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 77, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "It's a Date!", character: "Jason & Lucia", status: "caution", instruction: "Evening date night includes romantic scenes that fade to black; skip the ending cutscene." },
+      { id: 78, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Party Hard", character: "Jason & Lucia", status: "caution", instruction: "Celebrity launch party has revealing clubwear in the background before the action begins." },
+      { id: 79, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Heavy Lifting", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 80, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Photo/Shoot", character: "Jason & Lucia", status: "caution", instruction: "Promo shoot features revealing outfits and suggestive poses; skip the intro/outro cutscenes." },
+      { id: 81, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Making Gainz", character: "Lucia", status: "caution", instruction: "Gym setting includes tight workout attire and suggestive banter; focus on the workout prompts." },
+      { id: 82, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Too Much Baggage", character: "Jason", status: "safe", instruction: "" },
+      { id: 83, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Watch It", character: "Jason", status: "safe", instruction: "" },
+      { id: 84, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Cash Injections", character: "Lucia", status: "safe", instruction: "" },
+      { id: 85, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Amateur Hour", character: "Lucia", status: "explicit", instruction: "SKIP CUTSCENES when meeting the film crew at the corner and camper—involves an adult film crew with explicit dialogue and crude props." },
+      { id: 86, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Dirty Work", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 87, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Adventures in Babysitting", character: "Jason", status: "explicit", instruction: "Nightclub VIP security duty; keep camera angled down away from VIP booths/dancers and skip all club cutscenes." },
+      { id: 88, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Fresh Evidence", character: "Jason", status: "explicit", instruction: "Hold skip on cutscenes—retrieving blackmail material involves explicit adult footage/photos." },
+      { id: 89, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Power Play", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 90, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Child's Play", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 91, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Headliners", character: "Jason & Lucia", status: "explicit", instruction: "VYB nightclub launch party with explicit dancing and club visuals; skip all cutscenes and keep camera angled down." },
+      { id: 92, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Close Surveillance", character: "Jason", status: "caution", instruction: "Spy drone recon around a beach gym; keep the drone camera aimed strictly at the target group." },
+      { id: 93, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Delivery Method", character: "Jason", status: "safe", instruction: "" },
+      { id: 94, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Team Building", character: "Lucia", status: "safe", instruction: "" },
+      { id: 95, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Fully Catered", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 96, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "VCIA Takedown", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 97, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Tie Up Loose Ends", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 98, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Call Valentina Back", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 99, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Sunset", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 100, chapter: "Chapter 4", chapterTitle: "Vice City, Baby", title: "Starting From Zero", character: "Jason & Lucia", status: "safe", instruction: "" },
+
+      // CHAPTER 5: Top of the World, Ma (101–109)
+      { id: 101, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "Bird in the Hand", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 102, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "Taking Liberties", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 103, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "VC Baby", character: "Jason & Lucia", status: "caution", instruction: "Brief background party/beachwear in Vice City; stay focused on the driving objective." },
+      { id: 104, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "Doggie Bag", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 105, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "Operation Savage Glory", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 106, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "Honest Abe", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 107, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "Unfinished Business", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 108, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "Protective Custody", character: "Jason & Lucia", status: "safe", instruction: "" },
+      { id: 109, chapter: "Chapter 5", chapterTitle: "Top of the World, Ma", title: "The End of the Road", character: "Jason & Lucia", status: "safe", instruction: "" }
+    ];
+
+    // App State
+    let currentMissionId = 1;
+    let isMuted = false;
+    let audioCtx = null;
+    let toastTimeout = null;
+
+    // Load saved state safely
+    try {
+      const savedId = localStorage.getItem('gtavi_cleanplay_current_id');
+      const savedMute = localStorage.getItem('gtavi_cleanplay_muted');
+      if (savedId && MISSIONS.some(m => m.id === Number(savedId))) {
+        currentMissionId = Number(savedId);
+      }
+      if (savedMute === 'true') {
+        isMuted = true;
+      }
+    } catch (e) {
+      // Fallback if storage is restricted
+    }
+
+    // DOM Elements
+    const activeMissionCard = document.getElementById('activeMissionCard');
+    const missionListContainer = document.getElementById('missionListContainer');
+    const chapterFilter = document.getElementById('chapterFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const nextMissionBtn = document.getElementById('nextMissionBtn');
+    const prevMissionBtn = document.getElementById('prevMissionBtn');
+    const resetProgressBtn = document.getElementById('resetProgressBtn');
+    const muteToggleBtn = document.getElementById('muteToggleBtn');
+    const testChimeBtn = document.getElementById('testChimeBtn');
+    const soundOnIcon = document.getElementById('soundOnIcon');
+    const soundOffIcon = document.getElementById('soundOffIcon');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const filteredCountBadge = document.getElementById('filteredCountBadge');
+    const toastBanner = document.getElementById('toastBanner');
+    const toastInner = document.getElementById('toastInner');
+    const toastText = document.getElementById('toastText');
+
+    /**
+     * Web Audio API Warning Chime Synthesizer
+     * Plays a distinct two-tone caution chime or urgent triple-pulse alert for explicit missions.
+     */
+    function playWarningChime(type = 'explicit') {
+      if (isMuted) return;
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'explicit') {
+          // Urgent 3-pulse warning chime (E5 -> C5 -> E5)
+          const notes = [659.25, 523.25, 783.99];
+          notes.forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.13);
+
+            gain.gain.setValueAtTime(0.001, now + idx * 0.13);
+            gain.gain.exponentialRampToValueAtTime(0.28, now + idx * 0.13 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.13 + 0.12);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.13);
+            osc.stop(now + idx * 0.13 + 0.13);
+          });
+        } else {
+          // Soft 2-tone caution chime (A4 -> D5)
+          const notes = [440, 587.33];
+          notes.forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+
+            gain.gain.setValueAtTime(0.001, now + idx * 0.16);
+            gain.gain.exponentialRampToValueAtTime(0.2, now + idx * 0.16 + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.18);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.16);
+            osc.stop(now + idx * 0.16 + 0.19);
+          });
+        }
+      } catch (err) {
+        console.warn('Web Audio API unavailable:', err);
+      }
+    }
+
+    /**
+     * Show non-intrusive visual alert banner when advancing to a flagged mission
+     */
+    function showToast(message, status) {
+      clearTimeout(toastTimeout);
+      toastText.textContent = message;
+
+      if (status === 'explicit') {
+        toastInner.className = 'px-4 py-2.5 rounded-2xl bg-rose-950/95 border border-rose-500 text-rose-100 text-xs font-bold shadow-2xl flex items-center gap-2';
+      } else {
+        toastInner.className = 'px-4 py-2.5 rounded-2xl bg-amber-950/95 border border-amber-500 text-amber-100 text-xs font-bold shadow-2xl flex items-center gap-2';
+      }
+
+      toastBanner.classList.remove('opacity-0', '-translate-y-2');
+      toastBanner.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimeout = setTimeout(() => {
+        toastBanner.classList.remove('opacity-100', 'translate-y-0');
+        toastBanner.classList.add('opacity-0', '-translate-y-2');
+      }, 3400);
+    }
+
+    /**
+     * Helper to build status badge HTML
+     */
+    function getStatusBadgeHTML(status) {
+      if (status === 'explicit') {
+        return `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/50 text-rose-300 text-[11px] font-extrabold uppercase tracking-wide">
+            <svg class="w-3.5 h-3.5 text-rose-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            SKIP CUTSCENE (Explicit)
+          </span>
+        `;
+      }
+      if (status === 'caution') {
+        return `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[11px] font-bold uppercase tracking-wide">
+            <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            Caution (Mild/Background)
+          </span>
+        `;
+      }
+      return `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 text-[11px] font-bold uppercase tracking-wide">
+          <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Safe
+        </span>
+      `;
+    }
+
+    /**
+     * Render Active Mission Spotlight Card
+     */
+    function renderActiveMission() {
+      const mission = MISSIONS.find(m => m.id === currentMissionId) || MISSIONS[0];
+
+      // Update card styling by severity
+      activeMissionCard.className = 'rounded-2xl bg-vice-card border-2 p-4 sm:p-5 transition-all duration-300 ';
+      if (mission.status === 'explicit') {
+        activeMissionCard.className += 'border-rose-500 vice-glow-pink animate-alert-border';
+      } else if (mission.status === 'caution') {
+        activeMissionCard.className += 'border-amber-500/70 vice-glow-amber';
+      } else {
+        activeMissionCard.className += 'border-emerald-500/40 vice-glow-emerald';
+      }
+
+      const instructionBlock = mission.instruction
+        ? `
+          <div class="mt-3.5 p-3.5 rounded-xl ${mission.status === 'explicit' ? 'bg-rose-950/60 border border-rose-500/40 text-rose-100' : 'bg-amber-950/50 border border-amber-500/35 text-amber-100'} text-xs sm:text-sm leading-relaxed">
+            <div class="font-extrabold uppercase text-[10px] tracking-wider mb-1 ${mission.status === 'explicit' ? 'text-rose-400' : 'text-amber-400'}">
+              Action Required
+            </div>
+            ${mission.instruction}
+          </div>
+        `
+        : `
+          <div class="mt-3.5 p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/25 text-emerald-200/90 text-xs flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>No explicit scenes or nudity flagged in this mission. Play normally.</span>
+          </div>
+        `;
+
+      activeMissionCard.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-vice-cyan">
+            #${mission.id} • ${mission.chapter}: ${mission.chapterTitle}
+          </span>
+          <span class="text-[11px] font-semibold text-zinc-400 bg-vice-elevated px-2.5 py-0.5 rounded-md border border-vice-border">
+            Playable: ${mission.character}
+          </span>
+        </div>
+
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2.5">
+          ${mission.title}
+        </h2>
+
+        <div>
+          ${getStatusBadgeHTML(mission.status)}
+        </div>
+
+        ${instructionBlock}
+      `;
+
+      // Update Progress & Footer Buttons
+      const pct = Math.round((mission.id / MISSIONS.length) * 100);
+      progressBar.style.width = `${pct}%`;
+      progressText.textContent = `${mission.id} / ${MISSIONS.length}`;
+
+      prevMissionBtn.disabled = mission.id <= 1;
+      if (mission.id >= MISSIONS.length) {
+        nextMissionBtn.innerHTML = `
+          <span>Story Complete (109/109)</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        `;
+      } else {
+        const nextM = MISSIONS[mission.id]; // 0-indexed next mission
+        nextMissionBtn.innerHTML = `
+          <span>Next: #${nextM.id} ${nextM.title}</span>
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        `;
+      }
+
+      saveState();
+    }
+
+    /**
+     * Render Filtered Mission List
+     */
+    function renderMissionList() {
+      const selectedChapter = chapterFilter.value;
+      const selectedStatus = statusFilter.value;
+
+      const filtered = MISSIONS.filter(m => {
+        const chapterMatch = selectedChapter === 'all' || m.chapter === selectedChapter;
+        let statusMatch = true;
+        if (selectedStatus === 'flagged') {
+          statusMatch = m.status === 'explicit' || m.status === 'caution';
+        } else if (selectedStatus !== 'all') {
+          statusMatch = m.status === selectedStatus;
+        }
+        return chapterMatch && statusMatch;
+      });
+
+      filteredCountBadge.textContent = `${filtered.length} mission${filtered.length === 1 ? '' : 's'}`;
+
+      if (filtered.length === 0) {
+        missionListContainer.innerHTML = `
+          <div class="rounded-2xl bg-vice-card border border-vice-border p-6 text-center text-sm text-zinc-400">
+            No missions match the selected filters.
+          </div>
+        `;
+        return;
+      }
+
+      missionListContainer.innerHTML = filtered.map(m => {
+        const isCurrent = m.id === currentMissionId;
+        const isCompleted = m.id < currentMissionId;
+
+        let borderClass = 'border-vice-border hover:border-zinc-700';
+        if (isCurrent) {
+          borderClass = 'border-vice-cyan ring-1 ring-vice-cyan/40 bg-vice-elevated/90';
+        } else if (m.status === 'explicit') {
+          borderClass = 'border-rose-500/40 hover:border-rose-500/70';
+        } else if (m.status === 'caution') {
+          borderClass = 'border-amber-500/30 hover:border-amber-500/60';
+        }
+
+        return `
+          <article data-mission-id="${m.id}"
+            class="mission-item cursor-pointer rounded-2xl bg-vice-card border ${borderClass} p-3.5 sm:p-4 transition active:scale-[0.99] ${isCompleted && !isCurrent ? 'opacity-70' : ''}">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 text-[11px] font-semibold text-zinc-400 mb-0.5">
+                  <span class="font-bold ${isCurrent ? 'text-vice-cyan' : 'text-zinc-300'}">#${m.id}</span>
+                  <span>•</span>
+                  <span class="truncate">${m.chapter}</span>
+                  ${isCurrent ? '<span class="px-1.5 py-0.2 rounded bg-vice-cyan/20 text-vice-cyan text-[10px] font-extrabold uppercase">Active</span>' : ''}
+                  ${isCompleted ? '<span class="text-emerald-400 text-[10px] font-bold">✓ Done</span>' : ''}
+                </div>
+                <h3 class="text-sm sm:text-base font-bold text-white truncate">
+                  ${m.title}
+                </h3>
+              </div>
+
+              <div class="shrink-0">
+                ${getStatusBadgeHTML(m.status)}
+              </div>
+            </div>
+
+            ${m.instruction ? `
+              <p class="mt-2.5 text-xs ${m.status === 'explicit' ? 'text-rose-200 bg-rose-950/40 border-rose-500/30' : 'text-amber-200 bg-amber-950/30 border-amber-500/25'} border rounded-xl px-3 py-2 leading-relaxed">
+                ${m.instruction}
+              </p>
+            ` : ''}
+          </article>
+        `;
+      }).join('');
+
+      // Attach click handlers to jump directly to any mission
+      document.querySelectorAll('.mission-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const targetId = Number(el.getAttribute('data-mission-id'));
+          selectMission(targetId, true);
+        });
+      });
+    }
+
+    /**
+     * Select a mission by ID, update UI, and trigger chime if flagged
+     */
+    function selectMission(id, scrollToTop = false) {
+      if (id < 1 || id > MISSIONS.length) return;
+      currentMissionId = id;
+      const mission = MISSIONS.find(m => m.id === currentMissionId);
+
+      renderActiveMission();
+      renderMissionList();
+
+      if (mission && (mission.status === 'explicit' || mission.status === 'caution')) {
+        playWarningChime(mission.status);
+        const label = mission.status === 'explicit'
+          ? `ALERT #${mission.id}: SKIP CUTSCENE (${mission.title})`
+          : `CAUTION #${mission.id}: Mild/Background (${mission.title})`;
+        showToast(label, mission.status);
+      }
+
+      if (scrollToTop) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    /**
+     * Save progress & mute preferences
+     */
+    function saveState() {
+      try {
+        localStorage.setItem('gtavi_cleanplay_current_id', String(currentMissionId));
+        localStorage.setItem('gtavi_cleanplay_muted', String(isMuted));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    /**
+     * Sync Mute Button UI
+     */
+    function updateMuteUI() {
+      if (isMuted) {
+        soundOnIcon.classList.add('hidden');
+        soundOffIcon.classList.remove('hidden');
+      } else {
+        soundOnIcon.classList.remove('hidden');
+        soundOffIcon.classList.add('hidden');
+      }
+    }
+
+    // Event Listeners
+    nextMissionBtn.addEventListener('click', () => {
+      if (currentMissionId < MISSIONS.length) {
+        selectMission(currentMissionId + 1, false);
+        const activeEl = document.querySelector(`[data-mission-id="${currentMissionId}"]`);
+        if (activeEl) {
+          activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    });
+
+    prevMissionBtn.addEventListener('click', () => {
+      if (currentMissionId > 1) {
+        selectMission(currentMissionId - 1, false);
+      }
+    });
+
+    resetProgressBtn.addEventListener('click', () => {
+      chapterFilter.value = 'all';
+      statusFilter.value = 'all';
+      selectMission(1, true);
+    });
+
+    chapterFilter.addEventListener('change', () => {
+      renderMissionList();
+    });
+
+    statusFilter.addEventListener('change', () => {
+      renderMissionList();
+    });
+
+    muteToggleBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteUI();
+      saveState();
+      if (!isMuted) {
+        playWarningChime('caution');
+      }
+    });
+
+    testChimeBtn.addEventListener('click', () => {
+      if (isMuted) {
+        isMuted = false;
+        updateMuteUI();
+        saveState();
+      }
+      playWarningChime('explicit');
+      showToast('Audio Alert Test: Explicit Mission Chime', 'explicit');
+    });
+
+    // Initialize Application
+    window.addEventListener('DOMContentLoaded', () => {
+      updateMuteUI();
+      renderActiveMission();
+      renderMissionList();
+    });
+  </script>
+</body>
+</html>
